@@ -1,0 +1,24 @@
+{
+  "name": "merchnow-ai",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:web": "cd web && npm run dev",
+    "dev:mobile": "cd mobile && npx expo start",
+    "build": "npm run build:server && npm run build:web",
+    "build:server": "cd server && npm run build",
+    "build:web": "cd web && npm run build",
+    "build:mobile": "cd mobile && npx expo export -p android --output-dir ../dist/mobile",
+    "db:reset": "cd server && npm run db:reset",
+    "db:seed": "cd server && npm run db:seed",
+    "typecheck": "cd server && npm run typecheck && cd ../web && npm run typecheck && cd ../mobile && npm run typecheck",
+    "lint": "cd server && npm run lint && cd ../web && npm run lint && cd ../mobile && npm run lint",
+    "test": "cd server && npm test && cd ../web && npm test && cd ../mobile && npm test",
+    "start": "cd server && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
