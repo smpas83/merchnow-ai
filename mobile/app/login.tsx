@@ -5,7 +5,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../_layout';
+import { useAuth } from '../src/auth';
 
 export default function LoginScreen() {
   const router = useRouter();

@@ -4,7 +4,7 @@ import {
   RefreshControl, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth, apiCall } from '../../_layout';
+import { useAuth, apiCall } from '../../src/auth';
 
 export default function CustomerDashboard() {
   const router = useRouter();

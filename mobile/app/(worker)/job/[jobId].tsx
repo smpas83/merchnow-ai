@@ -4,7 +4,7 @@ import {
   ActivityIndicator, RefreshControl, Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useAuth, apiCall } from '../../../_layout';
+import { useAuth, apiCall } from '../../../src/auth';
 
 export default function WorkerJobDetail() {
   const router = useRouter();
