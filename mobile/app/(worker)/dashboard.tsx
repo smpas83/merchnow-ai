@@ -15,6 +15,7 @@ export default function WorkerDashboard() {
   const [availability, setAvailability] = useState<any>(null);
   const [acceptingJobId, setAcceptingJobId] = useState<string | null>(null);
 
+  const [ refreshed, setRefreshed ] = useState(false);
   const loadData = async () => {
     try {
       const [jRes, aRes, availRes] = await Promise.all([
@@ -44,7 +45,7 @@ export default function WorkerDashboard() {
       if (pendingAssign) {
         await apiCall(`/assignments/${pendingAssign.id}/accept`, { method: 'POST' });
         Alert.alert('Job Accepted', 'You have accepted this job. Navigate to the store to begin.');
-        loadData();
+        loadData().finally(() => setRefreshed(false));
       } else {
         Alert.alert('Not Available', 'This job is not assigned to you.');
       }
@@ -80,7 +81,7 @@ export default function WorkerDashboard() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scroll} refreshControl={new RefreshControl(onRefresh={loadData})}>
+      <ScrollView style={styles.scroll} refreshControl={<RefreshControl refreshing={false} onRefresh={loadData} />}>
         {/* Availability Toggle */}
         <View style={styles.availabilityCard}>
           <View style={styles.availRow}>
@@ -99,7 +100,7 @@ export default function WorkerDashboard() {
                   } else {
                     await apiCall('/dispatch/worker-availability', { method: 'POST' });
                   }
-                  loadData();
+                  loadData().finally(() => setRefreshed(false));
                 } catch (e: any) { Alert.alert('Error', e.message); }
               }}
             >

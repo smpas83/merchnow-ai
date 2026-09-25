@@ -186,7 +186,7 @@ export default function AdminDashboard() {
             )}
           </View>
         )}
-        refreshControl={new RefreshControl(onRefresh={loadData})}
+        refreshControl={<RefreshControl refreshing={false} onRefresh={loadData} />}
         contentContainerStyle={styles.listContent}
       />
     </View>

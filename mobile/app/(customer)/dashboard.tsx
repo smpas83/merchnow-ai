@@ -55,7 +55,7 @@ export default function CustomerDashboard() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scroll} refreshControl={new RefreshControl(onRefresh={loadData})}>
+      <ScrollView style={styles.scroll} refreshControl={<RefreshControl refreshing={false} onRefresh={loadData} />}>
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{jobs.length}</Text>

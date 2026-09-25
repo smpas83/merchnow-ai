@@ -58,8 +58,8 @@ export default function WorkerJobDetail() {
           location_note: 'Store location',
         }),
       });
-      setCheckins(prev => [{ id: result.id, ...result }, ...prev]);
-      setJob(prev => prev ? { ...prev, status: result.status } : null);
+      setCheckins((prev: any[]) => [{ id: result.id, ...result }, ...prev]);
+      setJob((prev: any) => prev ? { ...prev, status: result.status } : null);
       setShowingCheckin(false);
       Alert.alert('Checked In', 'You have successfully checked in at this location.');
       loadData();
@@ -138,7 +138,7 @@ export default function WorkerJobDetail() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scroll} refreshControl={new RefreshControl(onRefresh={loadData})}>
+      <ScrollView style={styles.scroll} refreshControl={<RefreshControl refreshing={false} onRefresh={loadData} />}>
         {/* Job Header */}
         <View style={styles.headerCard}>
           <View style={styles.headerTop}>

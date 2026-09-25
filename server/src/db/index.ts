@@ -83,8 +83,8 @@ export function seed() {
     'user_admin', 'admin@demo.com', adminHash, 'Demo', 'Admin', 'admin', 'active', now, now);
   execute(`INSERT OR IGNORE INTO users (id, email, password_hash, first_name, last_name, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     'user_worker', 'worker@demo.com', workerHash, 'Demo', 'Worker', 'worker', 'active', now, now);
-  execute(`INSERT OR IGNORE INTO users (id, email, password_hash, first_name, last_name, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    'user_customer', 'customer@demo.com', orgHash, 'Demo', 'Customer', 'customer', 'active', now, now);
+  execute(`INSERT OR IGNORE INTO users (id, email, password_hash, first_name, last_name, role, organization_id, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    'user_customer', 'customer@demo.com', orgHash, 'Demo', 'Customer', 'customer', orgId, 'active', now, now);
   execute(`INSERT OR IGNORE INTO worker_profiles (id, user_id, hourly_rate, is_available, travel_radius_miles, total_jobs_completed, avg_rating, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     'wp_worker', 'user_worker', 25.0, 1, 25, 0, null, now, now);
   execute(`INSERT OR IGNORE INTO stores (id, organization_id, name, address, city, state, zip, latitude, longitude, instructions, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
