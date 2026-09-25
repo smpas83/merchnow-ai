@@ -1,4 +1,5 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import express from 'express';
+const { Router, Request, Response, NextFunction } = express;
 import jwt from 'jsonwebtoken';
 import { v4 as uuid } from 'uuid';
 import { execute } from '../db/index.js';
@@ -10,7 +11,8 @@ const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'merchnow-dev-secret-change-in-production';
 
 interface AuthRequest extends Request {
-  user?: { userId: string; role: string };
+  user?: { userId: string; role: string; organizationId?: string };
+  params: { filename?: string; jobId?: string; [key: string]: string | undefined };
 }
 
 function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
@@ -65,12 +67,99 @@ router.post('/upload', authMiddleware, uploadMiddleware.single('file'), (req: Au
 // GET /api/proof/job/:jobId
 router.get('/job/:jobId', authMiddleware, (req: AuthRequest, res: Response) => {
   const result = execute('SELECT * FROM proof_assets WHERE job_id = ? ORDER BY uploaded_at DESC', req.params.jobId);
-  res.json(result.rows || []);
+  const proofs = result.rows || [];
+  if (!proofs.length) return res.json([]);
+
+  const authorized: any[] = [];
+  for (const proof of proofs) {
+    const authResult = authorizeProofAccess(req, res, proof);
+    if (authResult instanceof Response) return authResult;
+    authorized.push(authResult);
+  }
+  res.json(authorized);
 });
 
-// GET /api/proof/files/:filename — serve uploaded file
+/** Authorize access to a proof asset. Returns the proof row if authorized,
+ *  or a Response with an error status if not. */
+function authorizeProofAccess(
+  req: AuthRequest,
+  res: Response,
+  proof: any
+): any {
+  const role = req.user!.role;
+  const userId = req.user!.userId;
+
+  if (role === 'admin') return proof;
+
+  const jobId = proof.job_id;
+
+  if (role === 'worker') {
+    const assignment = execute(
+      'SELECT * FROM job_assignments WHERE job_id = ? AND worker_id = ? AND status = ?',
+      jobId, userId, 'accepted'
+    );
+    if (!assignment.rows?.length) {
+      return res.status(403).json({ error: 'Not authorized: not assigned to this job' });
+    }
+    return proof;
+  }
+
+  if (role === 'customer') {
+    const user = execute('SELECT organization_id FROM users WHERE id = ?', userId);
+    const orgId = user.rows?.[0]?.organization_id;
+    if (!orgId) {
+      return res.status(403).json({ error: 'Not authorized: no organization associated' });
+    }
+    const job = execute('SELECT organization_id FROM jobs WHERE id = ?', jobId);
+    if (!job.rows?.length || job.rows[0].organization_id !== orgId) {
+      return res.status(403).json({ error: 'Not authorized: job does not belong to your organization' });
+    }
+    return proof;
+  }
+
+  return res.status(403).json({ error: 'Not authorized' });
+}
+
+/** Look up a proof asset by its file path (filename). Returns the proof row
+ *  or null if not found. Path traversal is prevented via basename. */
+function findProofByFilename(filename: string): any {
+  const safeFilename = path.basename(filename);
+  const proof = execute('SELECT * FROM proof_assets WHERE file_path = ?', safeFilename);
+  return proof.rows?.[0] || null;
+}
+
+// GET /api/proof/files/:filename — serve uploaded file with authorization
 router.get('/files/:filename', authMiddleware, (req: AuthRequest, res: Response) => {
-  const filePath = path.join(UPLOAD_DIR, req.params.filename);
+  // Path traversal prevention — only allow the basename
+  const safeFilename = path.basename(req.params.filename || '');
+  if (!safeFilename || safeFilename !== (req.params.filename || '')) {
+    return res.status(400).json({ error: 'Invalid filename' });
+  }
+
+  // Resolve proof asset and check ownership
+  const proof = execute('SELECT pa.*, j.worker_id, o.id as org_id FROM proof_assets pa LEFT JOIN jobs j ON pa.job_id = j.id LEFT JOIN organizations o ON j.organization_id = o.id WHERE pa.file_path = ?', safeFilename || '');
+  const record = proof.rows?.[0];
+  if (!record) return res.status(404).json({ error: 'File not found' });
+
+  const user = req.user;
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  // Role-based authorization
+  if (user.role === 'admin') {
+    // Admins can access all proof
+  } else if (user.role === 'worker') {
+    if (record.worker_id !== user.userId) {
+      return res.status(403).json({ error: 'Not authorized to access this proof' });
+    }
+  } else if (user.role === 'customer') {
+    if (record.org_id !== user.organizationId) {
+      return res.status(403).json({ error: 'Not authorized to access this proof' });
+    }
+  } else {
+    return res.status(403).json({ error: 'Not authorized' });
+  }
+
+  const filePath = path.join(UPLOAD_DIR, safeFilename);
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
   res.sendFile(filePath);
 });

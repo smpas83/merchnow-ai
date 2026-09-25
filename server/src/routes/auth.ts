@@ -1,12 +1,22 @@
-import { Router, Request, Response } from 'express';
+import express from 'express';
+const { Router, Request, Response } = express;
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { v4 as uuid } from 'uuid';
 import { execute } from '../db/index.js';
+import crypto from 'crypto';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'merchnow-dev-secret-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+const DEV_SECRET = 'merchnow-dev-secret-change-in-production';
+if (!JWT_SECRET || JWT_SECRET === DEV_SECRET) {
+  console.warn('WARNING: JWT_SECRET not properly configured. Use a strong secret in production.');
+}
+
+function getSecret(): string {
+  return JWT_SECRET || DEV_SECRET;
+}
 
 interface AuthRequest extends Request {
   user?: { userId: string; role: string };
@@ -19,16 +29,23 @@ function authMiddleware(req: AuthRequest, res: Response, next: () => void) {
   }
   try {
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; role: string };
-    req.user = decoded;
+    const decoded = jwt.verify(token, getSecret()) as jwt.JwtPayload & { userId: string; role: string };
+    if (!decoded.userId) return res.status(401).json({ error: 'Invalid token' });
+    // Check token blacklist
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const blacklisted = execute('SELECT id FROM jwt_blacklist WHERE token_hash = ? AND expires_at > ?',
+      tokenHash, new Date().toISOString());
+    if (blacklisted.rows?.length) return res.status(401).json({ error: 'Token revoked' });
+    req.user = { userId: decoded.userId, role: decoded.role };
     next();
-  } catch {
+  } catch (err: any) {
+    if (err.name === 'TokenExpiredError') return res.status(401).json({ error: 'Token expired' });
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
 
 function createToken(userId: string, role: string): string {
-  return jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ userId, role }, getSecret(), { expiresIn: '15m' });
 }
 
 // ─── REGISTER ─────────────────────────────────────────────────────────────────
@@ -92,6 +109,32 @@ router.post('/login', (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
+});
+
+// ─── REFRESH ───────────────────────────────────────────────────────────────────
+
+router.post('/refresh', authMiddleware, (req: AuthRequest, res: Response) => {
+  try {
+    const result = execute('SELECT * FROM users WHERE id = ?', req.user!.userId);
+    const user = result.rows?.[0] as any;
+    if (!user) return res.status(401).json({ error: 'User not found' });
+    const newToken = createToken(user.id, user.role);
+    res.json({ token: newToken, expiresIn: 900 });
+  } catch (error: any) { res.status(400).json({ error: error.message }); }
+});
+
+// ─── LOGOUT ────────────────────────────────────────────────────────────────────
+
+router.post('/logout', authMiddleware, (req: AuthRequest, res: Response) => {
+  try {
+    const token = (req.headers['authorization'] as string).substring(7);
+    const decoded = jwt.verify(token, getSecret()) as jwt.JwtPayload;
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = (decoded.exp ? new Date(decoded.exp * 1000).toISOString() : new Date(Date.now() + 900000).toISOString());
+    execute('INSERT OR IGNORE INTO jwt_blacklist (id, token_hash, expires_at, created_at) VALUES (?, ?, ?, ?)',
+      uuid(), tokenHash, expiresAt, new Date().toISOString());
+    res.json({ success: true, message: 'Logged out' });
+  } catch (error: any) { res.status(400).json({ error: error.message }); }
 });
 
 // ─── ME ────────────────────────────────────────────────────────────────────────

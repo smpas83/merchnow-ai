@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { initSchema, seed } from './db/index.js';
+import { requestLogger } from './logging.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,7 +13,7 @@ initSchema();
 seed();
 
 // Middleware
-app.use(cors());
+app.use(requestLogger);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(rateLimit({
@@ -57,7 +58,14 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/audit', auditRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' }));
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' });
+});
+
+// Readiness check
+app.get('/api/ready', (_req, res) => {
+  res.json({ ready: true, timestamp: new Date().toISOString(), version: '1.0.0' });
+});
 
 // 404 handler
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));

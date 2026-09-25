@@ -1,0 +1,55 @@
+name: MerchNow CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+      - name: Install backend dependencies
+        run: cd server && npm ci
+      - name: Backend typecheck
+        run: cd server && npx tsc --noEmit
+      - name: Backend E2E test
+        run: cd server && bash test-e2e-final.sh
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+      - name: Install web dependencies
+        run: cd web && npm ci
+      - name: Web typecheck
+        run: cd web && npx tsc --noEmit
+      - name: Web production build
+        run: cd web && npm run build
+
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+      - name: Install mobile dependencies
+        run: cd mobile && npm ci
+      - name: Mobile typecheck
+        run: cd mobile && npx tsc --noEmit
+      - name: Expo export validation
+        run: cd mobile && npx expo export -p android --output-dir ../dist/mobile

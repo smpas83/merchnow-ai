@@ -23,3 +23,5 @@ web
 .prettierrc
 .cache
 
+*.db-wal
+*.db-shm

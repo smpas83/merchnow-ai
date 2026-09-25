@@ -9,7 +9,7 @@ const DB_PATH = path.join(__dirname, '..', '..', 'data', 'merchnow.db');
 
 let db: Database.Database | null = null;
 
-function getDb(): Database.Database {
+export function getDb(): Database.Database {
   if (!db) {
     db = new Database(DB_PATH);
     db.pragma('journal_mode = WAL');
