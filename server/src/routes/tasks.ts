@@ -1,4 +1,5 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import express from 'express';
+const { Router, Request, Response, NextFunction } = express;
 import jwt from 'jsonwebtoken';
 import { v4 as uuid } from 'uuid';
 import { execute } from '../db/index.js';
@@ -41,9 +42,19 @@ router.get('/:taskId', authMiddleware, (req: AuthRequest, res: Response) => {
 // POST /api/tasks/complete/:taskId
 router.post('/complete/:taskId', authMiddleware, (req: AuthRequest, res: Response) => {
   const { notes } = req.body || {};
+  const idempotencyKey = (req.headers as any)['x-idempotency-key'] as string | undefined;
   const taskResult = execute('SELECT * FROM tasks WHERE id = ?', req.params.taskId);
   const task = taskResult.rows?.[0];
   if (!task) return res.status(404).json({ error: 'Task not found' });
+
+  // Idempotency: if we have a key, check for existing result
+  if (idempotencyKey) {
+    const existing = execute('SELECT * FROM task_results WHERE task_id = ? AND notes = ? LIMIT 1', task.id, idempotencyKey);
+    if (existing.rows?.length) {
+      return res.status(200).json({ id: existing.rows[0].id, taskId: task.id, status: 'completed', idempotencyReplay: true });
+    }
+  }
+
   const id = uuid();
   const now = new Date().toISOString();
   execute('INSERT INTO task_results (id, task_id, job_id, worker_id, status, completed_at, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',

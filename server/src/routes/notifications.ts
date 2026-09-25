@@ -1,4 +1,5 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import express from 'express';
+const { Router, Request, Response, NextFunction } = express;
 import jwt from 'jsonwebtoken';
 import { execute } from '../db/index.js';
 
