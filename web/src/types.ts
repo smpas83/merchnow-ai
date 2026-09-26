@@ -93,8 +93,7 @@ export interface Job {
   completed_at?: string;
   cancelled_at?: string;
   no_show_at?: string;
-  store_name?: string;
-  store_address?: string;
+  store?: Store;
   created_at: string;
   updated_at: string;
 }
@@ -208,7 +207,7 @@ export interface AvailableJob {
   store_id: string;
   title: string;
   description?: string;
-  store_name?: string;
+  store?: Store;
   address?: string;
   latitude?: number;
   longitude?: number;

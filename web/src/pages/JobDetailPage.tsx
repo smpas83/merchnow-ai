@@ -221,8 +221,8 @@ export default function JobDetailPage() {
           <div className="card">
             <div className="card-header"><h3>Store</h3></div>
             <div className="card-body">
-              <p>{job.store_name || 'Unknown store'}</p>
-              {job.store_address && <p className="text-muted">{job.store_address}</p>}
+              <p>{job.store?.name || 'Unknown store'}</p>
+              {job.store?.address && <p className="text-muted">{job.store?.address}</p>}
             </div>
           </div>
           <div className="card">

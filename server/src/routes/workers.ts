@@ -35,7 +35,7 @@ router.get('/', authMiddleware, (req: AuthRequest, res: Response) => {
            wp.travel_radius_miles, wp.availability, wp.hourly_rate, wp.is_available,
            wp.total_jobs_completed, wp.avg_rating, wp.created_at
     FROM users u JOIN worker_profiles wp ON u.id = wp.user_id
-    WHERE u.role = 'worker' AND u.is_active = 1`;
+    WHERE u.role = 'worker' AND u.status = 'active'`;
   const params: string[] = [];
   if (skills) {
     const skillList = (skills as string).split(',');

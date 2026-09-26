@@ -245,8 +245,8 @@ router.get('/me/dashboard', authMiddleware, (req: AuthRequest, res: Response) =>
     };
     res.json({ type: 'customer', userId: user.id, organizationId: orgId, jobs, stats });
   } else {
-    const totalWorkers = execute("SELECT COUNT(*) as count FROM users WHERE role = 'worker' AND is_active = 1").rows?.[0]?.count || 0;
-    const totalCustomers = execute("SELECT COUNT(*) as count FROM users WHERE role = 'customer' AND is_active = 1").rows?.[0]?.count || 0;
+    const totalWorkers = execute("SELECT COUNT(*) as count FROM users WHERE role = 'worker' AND status = 'active'").rows?.[0]?.count || 0;
+    const totalCustomers = execute("SELECT COUNT(*) as count FROM users WHERE role = 'customer' AND status = 'active'").rows?.[0]?.count || 0;
     const totalJobs = execute('SELECT COUNT(*) as count FROM jobs').rows?.[0]?.count || 0;
     const activeJobs = execute("SELECT COUNT(*) as count FROM jobs WHERE status IN ('scheduled', 'assigned', 'accepted', 'en_route', 'checked_in', 'in_progress', 'submitted', 'under_review')").rows?.[0]?.count || 0;
     const completedJobs = execute("SELECT COUNT(*) as count FROM jobs WHERE status = 'completed'").rows?.[0]?.count || 0;
