@@ -13,6 +13,7 @@ initSchema();
 seed();
 
 // Middleware
+app.use(cors());
 app.use(requestLogger);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());

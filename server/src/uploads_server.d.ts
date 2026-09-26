@@ -1,4 +1,3 @@
-declare module './uploads_server.js' {
-  export const UPLOAD_DIR: string;
-  export const uploadMiddleware: any;
-}
+// Type declarations for uploads_server.js
+export declare const UPLOAD_DIR: string;
+export declare const uploadMiddleware: any;

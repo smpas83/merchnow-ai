@@ -1,5 +1,3 @@
-import { StorageObject } from '../types.js';
-
 export interface StorageProvider {
   /**
    * Store a file. Returns the storage key/path.

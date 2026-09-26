@@ -1,5 +1,6 @@
 import express from 'express';
-const { Router, Request, Response, NextFunction } = express;
+import type { Request, Response, NextFunction } from 'express';
+const { Router } = express;
 import jwt from 'jsonwebtoken';
 import { v4 as uuid } from 'uuid';
 import { execute } from '../db/index.js';
@@ -12,7 +13,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'merchnow-dev-secret-change-in-prod
 
 interface AuthRequest extends Request {
   user?: { userId: string; role: string; organizationId?: string };
-  params: { filename?: string; jobId?: string; [key: string]: string | undefined };
 }
 
 function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {

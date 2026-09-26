@@ -23,7 +23,7 @@ export function execute(sql: string, ...params: any[]): any {
   const database = getDb();
   const trimmed = sql.trim().toUpperCase();
   const stmt = database.prepare(sql);
-  
+
   if (trimmed.startsWith('SELECT') || trimmed.startsWith('PRAGMA')) {
     if (params.length === 0) {
       const info = stmt.get();
@@ -33,7 +33,7 @@ export function execute(sql: string, ...params: any[]): any {
     return { rows, columns: Object.keys(rows[0] || {}) };
   } else {
     const info = stmt.run(...params);
-    return { rows: [], changes: info.changes, lastInsertRowid: info.lastInsertRowid };
+    return { rows: [], changes: Number(info.changes), lastInsertRowid: Number(info.lastInsertRowid) };
   }
 }
 

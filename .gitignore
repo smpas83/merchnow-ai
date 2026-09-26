@@ -25,3 +25,5 @@ web
 
 *.db-wal
 *.db-shm
+/server/uploads/*.png
+/server/uploads/*.png
