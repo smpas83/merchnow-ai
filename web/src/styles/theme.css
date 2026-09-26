@@ -1,0 +1,51 @@
+{
+  "title": "MerchNow",
+  "theme": {
+    "colors": {
+      "primary": "#8B5CF6",
+      "secondary": "#EC4899",
+      "accent": "#10B981",
+      "background": "#F9FAFB",
+      "foreground": "#111827",
+      "muted": "#6B7280",
+      "destructive": "#EF4444",
+      "success": "#10B981",
+      "warning": "#F59E0B",
+      "info": "#3B82F6",
+      "border": "#E5E7EB",
+      "ring": "#8B5CF6"
+    },
+    "fonts": {
+      "body": "Inter, system-ui, sans-serif",
+      "heading": "Inter, system-ui, sans-serif"
+    }
+  }
+}
+
+:root {
+  --color-primary: #8B5CF6;
+  --color-secondary: #EC4899;
+  --color-accent: #10B981;
+  --color-background: #F9FAFB;
+  --color-foreground: #111827;
+  --color-muted: #6B7280;
+  --color-border: #E5E7EB;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-destructive: #EF4444;
+  --color-info: #3B82F6;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--color-foreground), system-ui, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}

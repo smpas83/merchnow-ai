@@ -17,7 +17,6 @@ dist
 .expo-dev-client
 .expo-updates
 web-build
-web
 *.tsbuildinfo
 .eslintcache
 .prettierrc
