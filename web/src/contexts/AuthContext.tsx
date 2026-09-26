@@ -3,6 +3,10 @@ import type { User } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
+function normalizeUser(u: any): User {
+  return { ...u, first_name: u.first_name ?? u.firstName, last_name: u.last_name ?? u.lastName, avatar_url: u.avatar_url ?? u.profilePhotoUrl };
+}
+
 function useToken() {
   const [token, setToken] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
@@ -36,7 +40,8 @@ function useUser() {
       })
         .then(r => r.json())
         .then(data => {
-          if (data.user) setUser(data.user);
+          const u = data.user ?? (data.id ? data : null);
+          if (u) setUser(normalizeUser(u));
           else if (data.error === 'Unauthorized') { setToken(null); setUser(null); }
         })
         .catch(() => setError('Failed to load user'))
@@ -58,7 +63,7 @@ function useUser() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed');
       setToken(data.token);
-      setUser(data.user);
+      setUser(normalizeUser(data.user));
       return data;
     } catch (e: any) {
       setError(e.message);
@@ -80,7 +85,7 @@ function useUser() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Registration failed');
       setToken(json.token);
-      setUser(json.user);
+      setUser(normalizeUser(json.user));
       return json;
     } catch (e: any) {
       setError(e.message);
