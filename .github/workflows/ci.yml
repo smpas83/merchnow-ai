@@ -20,10 +20,7 @@ jobs:
       - name: Backend typecheck
         run: cd server && npx tsc --noEmit
       - name: Backend E2E test
-        run: cd server && ./node_modules/.bin/tsx src/index.ts > /tmp/server.log 2>&1 &
-          sleep 8
-          curl -s http://localhost:3000/api/health || (cat /tmp/server.log && exit 1)
-          bash test-e2e-final.sh
+        run: cd server && bash ci_e2e.sh
 
   web:
     runs-on: ubuntu-latest
