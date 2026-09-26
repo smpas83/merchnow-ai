@@ -35,7 +35,7 @@ export default function StoresPage() {
     setError('');
     try {
       const parsed = createStoreSchema.safeParse({ ...createForm, latitude: createForm.latitude ? parseFloat(createForm.latitude) : undefined, longitude: createForm.longitude ? parseFloat(createForm.longitude) : undefined });
-      if (!parsed.success) { setError(parsed.error.errors[0].message); return; }
+      if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
       const store = await createStore(parsed.data);
       setStores(prev => [...prev, store]);
       setShowCreate(false);

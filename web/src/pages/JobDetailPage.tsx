@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getJob, updateJobStatus, getTasks, completeTask, getProof, getCheckIns, getReviews, getAssignments, acceptAssignment, declineAssignment, cancelAssignment, checkIn, uploadProof, sendMessage } from '../services/api';
+import { getJob, updateJobStatus, getTasks, completeTask, getProof, getCheckIns, getReviews, createReview, getAssignments, acceptAssignment, declineAssignment, cancelAssignment, checkIn, uploadProof, sendMessage } from '../services/api';
 import { z } from 'zod';
 import { updateJobStatusSchema, checkinSchema, reviewSchema, proofSchema } from '../services/validations';
 import type { Job, Task, ProofAsset, CheckIn, Review, JobStatus } from '../types';
@@ -59,7 +59,7 @@ export default function JobDetailPage() {
   const handleCheckin = async () => {
     try {
       const parsed = checkinSchema.safeParse(checkinForm);
-      if (!parsed.success) { setError(parsed.error.errors[0].message); return; }
+      if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
       const result = await checkIn(jobId, parsed.data);
       setCheckins(prev => [result, ...prev]);
       setShowCheckin(false);
@@ -70,7 +70,7 @@ export default function JobDetailPage() {
   const handleReview = async () => {
     try {
       const parsed = reviewSchema.safeParse({ ...reviewForm, reviewee_id: reviewForm.reviewee_id || job?.assigned_worker_id || '' });
-      if (!parsed.success) { setError(parsed.error.errors[0].message); return; }
+      if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
       const result = await createReview(parsed.data);
       setReviews(prev => [result, ...prev]);
       setShowReview(false);
@@ -80,7 +80,7 @@ export default function JobDetailPage() {
   const handleProof = async () => {
     try {
       const parsed = proofSchema.safeParse({ ...proofForm, job_id: jobId });
-      if (!parsed.success) { setError(parsed.error.errors[0].message); return; }
+      if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
       const result = await uploadProof(parsed.data);
       setProof(prev => [result, ...prev]);
       setShowProof(false);

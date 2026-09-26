@@ -43,7 +43,7 @@ export default function JobsPage() {
     setError('');
     try {
       const parsed = createJobSchema.safeParse({ ...createForm, base_price: parseFloat(createForm.base_price) || undefined, estimated_duration_minutes: parseInt(createForm.estimated_duration_minutes) || undefined });
-      if (!parsed.success) { setError(parsed.error.errors[0].message); return; }
+      if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
       const job = await createJob(parsed.data);
       await createDefaultTasks(job.id);
       setJobs(prev => [job, ...prev]);

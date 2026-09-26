@@ -16,7 +16,7 @@ export default function WorkersPage() {
     const load = async () => {
       try {
         const [wRes, orgRes] = await Promise.all([getWorkers(), getOrganizations()]);
-        setWorkers(wRes);
+        setWorkers(wRes as (WorkerProfile & { first_name: string; last_name: string; email: string })[]);
         setOrganizations(orgRes);
       } catch (e: any) { setError(e.message || 'Failed to load workers'); }
       finally { setLoading(false); }

@@ -16,7 +16,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const parsed = loginSchema.safeParse({ email, password });
-      if (!parsed.success) { setError(parsed.error.errors[0].message); return; }
+      if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
       await login(email, password);
       window.location.href = '/';
     } catch (err: any) {

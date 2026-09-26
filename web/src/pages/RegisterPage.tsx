@@ -18,7 +18,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const parsed = registerSchema.safeParse(form);
-      if (!parsed.success) { setError(parsed.error.errors[0].message); return; }
+      if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
       await register(parsed.data);
       window.location.href = '/';
     } catch (err: any) {

@@ -47,7 +47,7 @@ echo "  ORG=$ORG_ID STORE=$STORE_ID CAMP=$CAMP_ID JOB=$JOB_ID"
 if [ -z "$JOB_ID" ] || [ "$JOB_ID" = "null" ] || [ "$JOB_ID" = "" ]; then
   JOB_RESP=$(curl -s -X POST "$BASE/api/jobs" -H "Content-Type: application/json" -H "Authorization: Bearer $CM_TOKEN" \
     -d "{\"organizationId\":\"$ORG_ID\",\"storeId\":\"$STORE_ID\",\"title\":\"E2E Job\",\"description\":\"Test\",\"tasks\":[{\"title\":\"Check In\",\"category\":\"check_in\",\"proofType\":\"location\"},{\"title\":\"Install\",\"category\":\"execution\",\"proofType\":\"photo\"}]}")
-  JOB_ID=$(get_str "$JOB_RESP" "id")
+  JOB_ID=$(echo "$JOB_RESP" | get_str "id")
   check "Create job" "id" "$JOB_RESP"
   echo "  Created JOB_ID=$JOB_ID"
 else
@@ -211,7 +211,7 @@ SECOND_WR_TOKEN=$(curl -s -X POST "$BASE/api/auth/login" -H "Content-Type: appli
 # Create a second job as customer, worker should NOT be able to check-in without acceptance
 JOB2_RESP=$(curl -s -X POST "$BASE/api/jobs" -H "Content-Type: application/json" -H "Authorization: Bearer $CM_TOKEN" \
   -d "{\"organizationId\":\"$ORG_ID\",\"storeId\":\"$STORE_ID\",\"title\":\"Security Test Job\",\"description\":\"Test\",\"tasks\":[{\"title\":\"Test\"}]}")
-JOB2_ID=$(get_str "$JOB2_RESP" "id")
+JOB2_ID=$(echo "$JOB2_RESP" | get_str "id")
 if [ -n "$JOB2_ID" ] && [ "$JOB2_ID" != "" ] && [ "$JOB2_ID" != "null" ]; then
   CHECKIN2=$(curl -s -X POST "$BASE/api/jobs/$JOB2_ID/checkin" -H "Content-Type: application/json" -H "Authorization: Bearer $SECOND_WR_TOKEN" -d '{"latitude":37.7,"longitude":-122.4}')
   # Should fail  worker not assigned

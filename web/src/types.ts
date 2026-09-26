@@ -7,6 +7,7 @@ export interface User {
   phone?: string;
   avatar_url?: string;
   status?: string;
+  is_available?: number;
   created_at: string;
   updated_at: string;
 }
@@ -92,6 +93,8 @@ export interface Job {
   completed_at?: string;
   cancelled_at?: string;
   no_show_at?: string;
+  store_name?: string;
+  store_address?: string;
   created_at: string;
   updated_at: string;
 }

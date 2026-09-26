@@ -127,7 +127,7 @@ export default function AdminPage() {
                 </div>
 
                 <div className="card">
-                  <div class="card-header"><h3>Workers</h3></div>
+                  <div className="card-header"><h3>Workers</h3></div>
                   <div className="card-body">
                     <div className="admin-stats">
                       <div className="admin-stat"><span className="admin-stat-val">{workers.length}</span><span className="admin-stat-lbl">Registered</span></div>

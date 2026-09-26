@@ -32,7 +32,7 @@ export default function CampaignsPage() {
     setError('');
     try {
       const parsed = createCampaignSchema.safeParse({ ...createForm, start_date: createForm.start_date || undefined, end_date: createForm.end_date || undefined });
-      if (!parsed.success) { setError(parsed.error.errors[0].message); return; }
+      if (!parsed.success) { setError(parsed.error.issues[0].message); return; }
       const campaign = await createCampaign(parsed.data);
       setCampaigns(prev => [campaign, ...prev]);
       setShowCreate(false);

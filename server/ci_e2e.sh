@@ -13,4 +13,4 @@ for i in $(seq 1 30); do
 done
 curl -sf http://localhost:3000/api/health > /dev/null || { echo "Server never became healthy"; cat /tmp/server.log; exit 1; }
 
-bash test-e2e-final.sh || { echo "E2E failed, server log:"; cat /tmp/server.log; exit 1; }
+bash test-e2e-final.sh < /dev/null || { echo "E2E failed, server log:"; cat /tmp/server.log; exit 1; }
