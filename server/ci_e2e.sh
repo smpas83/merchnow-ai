@@ -1,4 +1,6 @@
-cd server
+#!/bin/bash
+set -e
+cd "$(dirname "$0")"
 ./node_modules/.bin/tsx src/index.ts > /tmp/server.log 2>&1 &
 sleep 8
 if ! curl -s http://localhost:3000/api/health > /dev/null; then
